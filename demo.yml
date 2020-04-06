@@ -1,0 +1,36 @@
+# This deploys Silver Peak EdgeConnect Virtual (ECV) appliance(s) to AWS.
+# 
+# Prerequisites:
+#   * AWS Account, with a programmatic access user 
+#   * AWS User ACCESS KEY and SECRET KEY specified, either in a vault file
+#     or somewhere else.  Below, it is specified in the ./aws/vars/vault.yml  
+#   * CloudInit compliant EC-V version - 8.1.9.6 or newer
+#     - As of March 2020, this was only privately available in US-WEST-1
+#   * Ansible Role aws_ec created and configured     
+#     - Key files are tasks/main.yml, vars/main.yml, defaults/main.yml
+
+---
+
+- name: Create ec2 instance(s) in AWS 
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  become: False
+  vars_files:
+    - ./vault/vault.yml
+  
+
+  roles:
+  
+    - role: aws_ec
+      vars: 
+        region: us-west-1
+        prefix: 172.20.65
+
+#    - role: aws_ec
+#      vars:
+#        region: ca-central-1
+#        prefix: 172.20.66
+#        instance_type: t2.xlarge
+
+ 

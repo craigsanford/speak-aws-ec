@@ -1,0 +1,241 @@
+---
+# tasks file for aws_ec
+
+  - debug: msg="{{ lookup('pipe','date') }}"
+
+  - name: Create VPC
+    ec2_vpc_net:
+      name: "Test-{{ region }}"
+      region: "{{ region }}"
+      cidr_block: "{{ prefix }}.0/24" 
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+    register: vpc
+
+  - name: Create Key
+    ec2_key:
+       aws_access_key: "{{ access_key }}"
+       aws_secret_key: "{{ secret_key }}"
+       region: "{{ region }}"
+       name: ECV_Dummy_Key
+
+  - name: Create LAN Subnet
+    ec2_vpc_subnet:
+      region: "{{ region }}"
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      vpc_id: "{{ vpc.vpc.id }}"
+      cidr: "{{ prefix }}.0/28"
+    register: lansub
+
+  - name: Create WAN Subnet
+    ec2_vpc_subnet:
+      region: "{{ region }}"
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      vpc_id: "{{ vpc.vpc.id }}"
+      cidr: "{{ prefix }}.16/28" 
+    register: wansub
+
+  - name: Create SG
+    ec2_group: 
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      state: present
+      region: "{{ region }}"
+      name: "{{ instance_name}}"
+      description: SG for WAN0
+      vpc_id: "{{ vpc.vpc.id }}"
+      rules:
+        - proto: tcp
+          ports: 
+            - 22
+            - 443
+          cidr_ip:
+            - "{{ my_public_ip }}"
+          rule_desc: allow SSH,HTTPS
+    register: sg
+
+  - name: Create igw  
+    ec2_vpc_igw:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      state: present
+      region: "{{ region }}"
+      vpc_id: "{{ vpc.vpc.id }}"
+    register: igw
+
+  - name: Add igw to route table
+    ec2_vpc_route_table:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      state: present
+      region: "{{ region }}"
+      vpc_id: "{{ vpc.vpc.id }}" 
+      routes:
+        - dest: "{{ prefix }}.0/24"
+          gateway_id: local
+        - dest: 0.0.0.0/0
+          gateway_id: "{{ igw.gateway_id }}"
+      subnets:
+        - "{{ wansub.subnet.id }}" 
+    tags: reboot
+
+  - name: Create an ec2 instance
+    ec2_instance:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      key_name: ECV_Dummy_Key
+      security_group: "{{ sg.group_id }}"
+      instance_type: "{{ instance_type }}"
+      user_data:  "{{ cloudinit_user_data |string}}" 
+      tags:
+         type: ecv
+      image_id: "{{ ami }}"
+      wait: true
+      region: "{{ region }}"
+      vpc_subnet_id: "{{ wansub.subnet.id }}" 
+      network:
+         assign_public_ip: yes
+      name: "{{ instance_name }}"
+    register: ecv
+    tags: reboot
+
+  - name: Login
+    uri:
+      validate_certs: no
+      url:  "https://{{ ecv.instances[0].public_ip_address }}/rest/json/login"
+      body: {"user": "admin", "password": "{{ loginPassword }}"}
+      body_format: json
+      return_content: yes
+      method: POST
+      headers:
+        Content-Type: "application/json"
+    register: ecv_host
+    until: ecv_host.status == 200
+    retries: 360
+    delay: 10
+
+  - name: Save Changes
+    uri:
+      validate_certs: no
+      url: "https://{{ ecv.instances[0].public_ip_address }}/rest/json/saveChanges"
+      body_format: json
+      body: {}
+      return_content: yes
+      method: POST
+      headers:
+        Content-Type: "application/json"
+        Cookie: "{{ ecv_host.set_cookie }}"
+
+  - name: Add wan0 ENI
+    ec2_eni:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      private_ip_address: "{{ prefix }}.26"
+      attached: yes
+      subnet_id: "{{ wansub.subnet.id }}"
+      state: present
+      instance_id: "{{ ecv.instances[0].instance_id }}"
+      region: "{{ region }}"
+      device_index: 1
+      delete_on_termination: true
+      security_groups:  [ "{{ sg.group_id }}" ]
+    register: eni_wan0
+
+  - name: Create EIP, add to eni_mgmt0
+    ec2_eip:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      device_id: "{{ ecv.instances[0].network_interfaces[0].network_interface_id }}"
+      private_ip_address: "{{ ecv.instances[0].network_interfaces[0].private_ip_address }}"
+      region: "{{ region }}"
+      release_on_disassociation: yes
+      in_vpc: yes
+    register: eip
+
+  - name: Add lan0 ENI
+    ec2_eni:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      private_ip_address: "{{ prefix }}.10"
+      attached: yes
+      subnet_id: "{{ lansub.subnet.id }}"
+      state: present
+      instance_id: "{{ ecv.instances[0].instance_id }}"
+      region: "{{ region }}"
+      device_index: 2
+      delete_on_termination: true
+      source_dest_check: no
+    register: eni_lan0
+
+  - name: Restart EC-V to add ENIs
+    ec2_instance:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      region: "{{ region }}"
+      state: restarted
+      instance_ids:
+        - "{{ ecv.instances[0].instance_id }}"
+    tags: reboot
+
+  - name: Login
+    uri:
+      validate_certs: no
+      url:  "https://{{ eip.public_ip }}/rest/json/login"
+      body: {"user": "admin", "password": "{{ loginPassword }}"}
+      body_format: json
+      return_content: yes
+      method: POST
+      headers:
+        Content-Type: "application/json"
+    register: ecv_host
+    until: ecv_host.status == 200
+    retries: 360
+    delay: 10
+
+  - name: Map mac
+    uri:
+      validate_certs: no
+      url: "https://{{ eip.public_ip }}/rest/json/cliMultiple"
+      body: {"commands": ["interface wan0 mac address {{ eni_wan0.interface.mac_address }}", "interface lan0 mac address {{ eni_lan0.interface.mac_address }}", "wr mem", "reboot noconfirm"]}
+      body_format: json
+      return_content: yes
+      method: POST
+      headers:
+        Content-Type: "application/json"
+        Cookie: "{{ ecv_host.set_cookie }}"
+
+  - name: Move EIP to eni_wan0
+    ec2_eip:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      device_id: "{{ eni_wan0.interface.id  }}"
+      region: "{{ region }}"
+      allow_reassociation: yes
+      public_ip: "{{ eip.public_ip }}" 
+      private_ip_address: "{{ eni_wan0.interface.private_ip_address }}" 
+      in_vpc: yes
+
+  - name: Delete Key
+    ec2_key:
+       aws_access_key: "{{ access_key }}"
+       aws_secret_key: "{{ secret_key }}"
+       region: "{{ region }}"
+       name: ECV_Dummy_Key
+       state: absent
+
+  - name: Change SG to allow all
+    ec2_group:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      region: "{{ region }}"
+      name: "{{ instance_name}}"
+      description: SG for WAN0 
+      rules:
+        - proto: all  
+          cidr_ip:
+            - 0.0.0.0/0 
+          rule_desc: allow all
+
+  - debug: msg="{{ lookup('pipe','date') }}"
