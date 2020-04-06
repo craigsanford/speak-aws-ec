@@ -1,0 +1,69 @@
+# Make sure this file is enabled for auto-approve and the tag
+# is named "AutomationDemo"
+
+applianceInfo:
+  softwareVersion:
+  hostname: AWS-US-WEST-1
+  group: Group 1
+  site: site1
+  location:
+    city: San Francisco
+    state: California
+    country: US
+  contact:
+    name: 
+    email:
+    phoneNumber: 
+  networkRole: non-hub
+
+templateGroups:
+  groups:
+    - Default Template Group
+    - AutomationDemo
+    
+businessIntentOverlays:
+    overlays:
+      - DefaultOverlay
+
+deploymentInfo:
+  deploymentMode: inline-router
+  totalOutboundBandwidth: 200000
+  totalInboundBandwidth: 200000
+  shapeInboundTraffic: true
+  passThroughShapedTraffic:
+    outboundMaxBandwidth: 10000000
+
+  deploymentInterfaces:
+    - interfaceName: lan0   
+      interfaceType: lan
+      interfaceComment: lan interface
+      ipAddressMask: 172.20.65.10/28
+      nextHop: 172.20.65.1
+
+    - interfaceName: wan0
+      interfaceLabel: INET1
+      interfaceType: wan
+      interfaceComment: wan interface
+      ipAddressMask: 172.20.65.26/28
+      nextHop: 172.20.65.17
+      outboundMaxBandwidth: 5000
+      inboundMaxBandwidth: 5000
+      firewallMode: statefulSNAT
+      behindNat: auto
+
+
+ 
+
+ecLicensing:
+  useDefaultAccount: true
+  bandwidthLevel: base
+  boost: 100000
+
+
+localRoutes:
+  useSharedSubnetInfo: true
+  advertiseLocalLanSubnets: true
+  advertiseLocalWanSubnets: false
+  localCommunities: 
+  localMetric: 50
+
