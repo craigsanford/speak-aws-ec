@@ -3,15 +3,19 @@
 # If new variables are not specified when the role is called, the below will be used
 
       # This is not secure, you should use ansible-vault as a better option
-      access_key: AKIAYD4JWMMDLVEQAO22
-      secret_key: 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
+      access_key: AKIAIOSFODNN7EXAMPLE
+      secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 
       loginPassword: Password1!
       
       # replace Example Account with the name of your account
       # replace Example Key with your key
       # *** Leave the Quotes *** 
-      cloudinit_user_data: '{"account": "Example Account", "key": "Example Key", "tag": "demo"}'
+      cloudinit_user_data: '{"account": "Example Account", "key": "ExampleKey", "tag": "AutomationDemo"}'
+
+      # my_public_ip sets the access list for the EC-V for initial deployment.  Recommendation is a /32 IP for the demo, 
+      # but this can be changed to 0.0.0.0/0 and then only rely on loginPassword above for security
+      my_public_ip: 69.138.223.240/32
 
 
 
@@ -23,7 +27,6 @@
       prefix: 172.20.62
       
       
-      #my_public_ip is the location of the ansible server
-      my_public_ip: 69.138.223.240/32
+
       
 
