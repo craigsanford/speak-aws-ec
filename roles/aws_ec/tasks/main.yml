@@ -105,7 +105,7 @@
     uri:
       validate_certs: no
       url:  "https://{{ ecv.instances[0].public_ip_address }}/rest/json/login"
-      body: {"user": "admin", "password": "{{ loginPassword }}"}
+      body: {"user": "{{ loginUser }}", "password": "{{ loginPassword }}"}
       body_format: json
       return_content: yes
       method: POST
@@ -183,7 +183,7 @@
     uri:
       validate_certs: no
       url:  "https://{{ eip.public_ip }}/rest/json/login"
-      body: {"user": "admin", "password": "{{ loginPassword }}"}
+      body: {"user": "{{ loginUser }}", "password": "{{ loginPassword }}"}
       body_format: json
       return_content: yes
       method: POST
