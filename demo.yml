@@ -16,9 +16,7 @@
   gather_facts: false
   connection: local
   become: False
-  vars_files:
-    - ./vault/vault.yml
-  
+
 
   roles:
   
@@ -27,10 +25,6 @@
         region: us-west-1
         prefix: 172.20.65
 
-#    - role: aws_ec
-#      vars:
-#        region: ca-central-1
-#        prefix: 172.20.66
-#        instance_type: t2.xlarge
+
 
  
