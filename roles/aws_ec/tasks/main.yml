@@ -52,7 +52,7 @@
             - 22
             - 443
           cidr_ip:
-            - "{{ my_public_ip }}"
+            - "{{ ansible_public_ip }}"
           rule_desc: allow SSH,HTTPS
     register: sg
 
