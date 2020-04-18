@@ -81,6 +81,17 @@
         - "{{ wansub.subnet.id }}" 
     tags: reboot
 
+  - name: find ami instance-id for RHEL7
+    ec2_ami_facts:
+      region: "{{ region }}" 
+      filters:
+        description: "*ECV-8.3.0.3*"
+    register: amis
+
+  - set_fact:
+      ecv_ami: >
+        {{ amis.images | selectattr('name', 'defined') | sort(attribute='creation_date') | last }}
+
   - name: Create an ec2 instance
     ec2_instance:
       aws_access_key: "{{ access_key }}"
@@ -91,7 +102,7 @@
       user_data:  "{{ cloudinit_user_data |string}}" 
       tags:
          type: ecv
-      image_id: "{{ ami }}"
+      image_id: "{{ ecv_ami.image_id }}"
       wait: true
       region: "{{ region }}"
       vpc_subnet_id: "{{ wansub.subnet.id }}" 

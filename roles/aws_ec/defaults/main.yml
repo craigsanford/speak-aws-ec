@@ -19,12 +19,9 @@
       # loginPassword above for security
       ansible_public_ip: 23.185.0.2/32
 
-
-
       # Advanced Options
       region: us-west-1	   
       instance_type: m4.xlarge
-      ami: ami-05005ffe6962ff194  
       instance_name: "ECV-{{ region }}"
       prefix: 172.20.62
       
