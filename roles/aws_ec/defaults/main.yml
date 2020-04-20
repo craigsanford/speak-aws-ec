@@ -17,7 +17,7 @@
       # ansible_public_ip sets the access list for the EC-V for initial deployment.  Recommendation is a /32 IP 
       # of the Ansible Server for the demo, but this can be as lax as 0.0.0.0/0 and then only rely on 
       # loginPassword above for security
-      ansible_public_ip: 69.138.223.240/32
+      ansible_public_ip: 23.185.0.2/32
 
       # Advanced Options
       region: us-west-1	   
