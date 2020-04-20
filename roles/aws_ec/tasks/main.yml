@@ -65,7 +65,7 @@
   - name: find ami instance-id for RHEL7
     ec2_ami_info:
       filters:
-        description: "*ECV-8.3.0.3*"
+        description: "*{{ edgeos_version }}*"
     register: amis
 
   - set_fact:
