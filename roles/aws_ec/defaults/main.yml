@@ -21,6 +21,7 @@
 
       # Advanced Options
       region: us-west-1	   
+      edgeos_version: ECV-8.3.0.3 
       instance_type: m4.xlarge
       instance_name: "ECV-{{ region }}"
       prefix: 172.20.62
