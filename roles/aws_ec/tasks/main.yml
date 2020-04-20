@@ -2,7 +2,8 @@
 # tasks file for aws_ec
 
 - block:
-  - debug: msg="{{ lookup('pipe','date') }}"
+  - debug: 
+      msg: "{{ lookup('pipe','date') }}"
 
   - name: Create VPC
     ec2_vpc_net:
@@ -204,7 +205,8 @@
             - 0.0.0.0/0 
           rule_desc: allow all
 
-  - debug: msg="{{ lookup('pipe','date') }}"
+  - debug: 
+      msg: "{{ lookup('pipe','date') }}"
 
   module_defaults:
     group/aws:
