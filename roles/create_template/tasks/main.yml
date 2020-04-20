@@ -1,0 +1,29 @@
+---
+# tasks file for create_template
+
+    - name: "Create preconfig template for EC device"
+      template:
+       src: "{{ blank_template_store_path }}/{{  base_template_name  }}"
+       dest: "{{  rendered_template_name  }}"
+      tags:
+       - "create_template"
+       - "encode_template"
+
+    - name: "import variable"
+      include_vars: 
+        file: "{{ rendered_template_name }}"  
+        name: preconfig
+      tags:
+       - "encode_template"    
+       
+    - name: "Encode the rendered config to base 64"
+      shell: echo "{{ preconfig | to_yaml | b64encode }}"
+      register: preconfigb64
+      tags:
+       - "encode_template"
+       
+    - name: "Show output"
+      debug:
+       msg: "{{ preconfigb64.stdout }}"
+      tags:
+        - "encode_template"
