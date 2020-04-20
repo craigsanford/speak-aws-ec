@@ -63,7 +63,7 @@
     tags: reboot
 
   - name: find ami instance-id for RHEL7
-    ec2_ami_facts:
+    ec2_ami_info:
       filters:
         description: "*ECV-8.3.0.3*"
     register: amis
