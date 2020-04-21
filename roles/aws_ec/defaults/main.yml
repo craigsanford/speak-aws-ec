@@ -2,37 +2,53 @@
 # default file for aws_ec
 # If new variables are not specified when the role is called, the below will be used
 
-      # This is not secure, you should use ansible-vault as a better option
-      access_key: AKIAIOSFODNN7EXAMPLE
-      secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+# This is not secure, you should use ansible-vault as a better option
+access_key: AKIAIOSFODNN7EXAMPLE
+secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
       
-      loginUser: automation
-      loginPassword: Password1!
+# These are the user/password created as part of the User Management template 
+loginUser: automation
+loginPassword: Password1!
       
-      # replace Example Account with the name of your account
-      # replace Example Key with your key
-      speak_account_name: Example Account
-      speak_account_key: ExampleKey
-      speak_tag: AutomationDemo
-      cloudinit:
-        account: "{{ speak_account_name }}"
-        key: "{{ speak_account_key }}"
-        tag: "{{ speak_tag }}"
+# The Account Name and Key can be found on the Orchestrator can be found
+# under the Cloud Portal menu
+# 
+# Replace Example Account with the name of your account
+# Replace Example Key with your key
+speak_account_name: Example Account
+speak_account_key: ExampleKey
+speak_tag: AutomationDemo
+
+# ansible_public_ip sets the access list for the EC-V for initial deployment.  
+# Recommendation is a /32 IP of the Ansible Server for the demo 
+ansible_public_ip: 23.185.0.2/32
 
 
 
 
-      # ansible_public_ip sets the access list for the EC-V for initial deployment.  Recommendation is a /32 IP 
-      # of the Ansible Server for the demo, but this can be as lax as 0.0.0.0/0 and then only rely on 
-      # loginPassword above for security
-      ansible_public_ip: 23.185.0.2/32
 
-      # Advanced Options
-      region: us-west-1	   
-      edgeos_version: ECV-8.3.0.3 
-      instance_type: m4.xlarge
-      instance_name: "ECV-{{ region }}"
-      prefix: 172.20.62
+# Advanced Options
+
+# This creates the User data to pass to AWS during ec2 creation
+cloudinit:
+  account: "{{ speak_account_name }}"
+  key: "{{ speak_account_key }}"
+  tag: "{{ speak_tag }}"
+
+# Default region
+region: us-west-1	   
+
+# Default Unity EdgeOS version to deploy
+edgeos_version: ECV-8.3.0.3 
+
+# Default image size 
+instance_type: m4.xlarge
+
+# Naming convention for ec2 instance
+instance_name: "ECV-{{ region }}"
+
+# Default prefix for the VPC and subnets
+prefix: 172.20.62
       
       
 
