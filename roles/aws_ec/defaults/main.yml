@@ -12,7 +12,18 @@
       # replace Example Account with the name of your account
       # replace Example Key with your key
       # *** Leave the Quotes *** 
-      cloudinit_user_data: '{"account": "Example Account", "key": "ExampleKey", "tag": "AutomationDemo"}'
+      #cloudinit_user_data: '{"account": "Example Account", "key": "ExampleKey", "tag": "AutomationDemo"}'
+
+      speak_account_name: Example Account
+      speak_account_key: ExampleKey
+      speak_tag: AutomationDemo
+      cloudinit:
+        account: "{{ speak_account_name }}"
+        key: "{{ speak_account_key }}"
+        tag: "{{ speak_tag }}"
+
+
+
 
       # ansible_public_ip sets the access list for the EC-V for initial deployment.  Recommendation is a /32 IP 
       # of the Ansible Server for the demo, but this can be as lax as 0.0.0.0/0 and then only rely on 
