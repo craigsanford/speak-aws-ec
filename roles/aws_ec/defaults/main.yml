@@ -11,9 +11,6 @@
       
       # replace Example Account with the name of your account
       # replace Example Key with your key
-      # *** Leave the Quotes *** 
-      #cloudinit_user_data: '{"account": "Example Account", "key": "ExampleKey", "tag": "AutomationDemo"}'
-
       speak_account_name: Example Account
       speak_account_key: ExampleKey
       speak_tag: AutomationDemo
