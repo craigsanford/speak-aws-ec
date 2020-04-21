@@ -2,7 +2,7 @@
 # default file for aws_ec
 # If new variables are not specified when the role is called, the below will be used
 
-# This is not secure, you should use ansible-vault as a better option
+# This is not secure, use ansible-vault as a better option
 access_key: AKIAIOSFODNN7EXAMPLE
 secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
       
@@ -10,11 +10,11 @@ secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 loginUser: automation
 loginPassword: Password1!
       
-# The Account Name and Key can be found on the Orchestrator can be found
-# under the Cloud Portal menu
+# The Account Name and Key can be found on the Orchestrator under the Cloud Portal menu
 # 
 # Replace Example Account with the name of your account
 # Replace Example Key with your key
+# Tag should match the preconfig file tag specified
 speak_account_name: Example Account
 speak_account_key: ExampleKey
 speak_tag: AutomationDemo
