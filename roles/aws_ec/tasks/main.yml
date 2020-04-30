@@ -62,7 +62,7 @@
         - "{{ wansub.subnet.id }}" 
     tags: reboot
 
-  - name: find ami instance-id for RHEL7
+  - name: find ami instance-id for EC-V
     ec2_ami_info:
       filters:
         description: "*{{ edgeos_version }}*"
